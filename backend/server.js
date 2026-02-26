@@ -1,0 +1,29 @@
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+
+const authRoutes = require('./routes/auth');
+const otpRoutes = require('./routes/otp');
+const sessionRoutes = require('./routes/session');
+const dashboardRoutes = require('./routes/dashboard');
+const widgetRoutes = require('./routes/widget');
+
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+app.use(cors());
+app.use(express.json());
+
+app.use('/api/auth', authRoutes);
+app.use('/api/otp', otpRoutes);
+app.use('/api/session', sessionRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/widget', widgetRoutes);
+
+app.get('/health', (req, res) => {
+  res.json({ status: "Guardian Auth Running" });
+});
+
+app.listen(PORT, () => {
+  console.log(`Guardian Auth server running on port ${PORT}`);
+});

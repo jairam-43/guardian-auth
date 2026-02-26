@@ -1,0 +1,23 @@
+﻿# Secret files - never upload these
+backend/.env
+keys.txt
+
+# Dependencies - too large to upload
+backend/node_modules/
+frontend/node_modules/
+
+# Build files
+frontend/dist/
+backend/dist/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# IDE files
+.vscode/settings.json
+.windsurf/
