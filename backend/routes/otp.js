@@ -48,7 +48,12 @@ router.post('/generate', async (req, res) => {
       return res.status(500).json({ success: false, error: 'Failed to send OTP email' });
     }
     
-    res.json({ success: true, message: 'OTP sent successfully' });
+    res.json({ 
+      success: true, 
+      message: 'OTP sent successfully',
+      otpCode: process.env.NODE_ENV !== 'production' ? otpCode : undefined,
+      expiresAt: otpExpiresAt.toISOString()
+    });
     
   } catch (error) {
     console.error('Generate OTP error:', error);

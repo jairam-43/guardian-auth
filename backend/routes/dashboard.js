@@ -46,14 +46,12 @@ router.get('/stats', async (req, res) => {
     
     res.json({
       success: true,
-      stats: {
-        totalUsers: totalUsers?.length || 0,
-        totalLogins,
-        successCount,
-        failedCount,
-        suspiciousCount,
-        successRate
-      }
+      totalUsers: totalUsers?.length || 0,
+      loginsToday: totalLogins,
+      successToday: successCount,
+      failedToday: failedCount,
+      suspiciousToday: suspiciousCount,
+      successRate
     });
     
   } catch (error) {

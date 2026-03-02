@@ -121,8 +121,8 @@ router.post('/start-session', async (req, res) => {
       return res.status(500).json({ success: false, error: 'Failed to load secret images' });
     }
     
-    const secretEmojis = secretImages.map(img => img.image_hash);
-    const grid = generateGrid(secretEmojis);
+    const secretIconIds = secretImages.map(img => img.emoji_char);
+    const grid = generateGrid(secretIconIds);
     
     const sessionToken = uuidv4();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
@@ -168,7 +168,13 @@ router.post('/start-session', async (req, res) => {
     res.json({
       success: true,
       sessionToken,
-      grid,
+      grid: grid.map(item => ({
+        id: item.id,
+        emoji: item.emoji,
+        label: item.emoji,
+        isSecret: item.isSecret,
+        position: item.position
+      })),
       ruleInstruction: getRuleInstruction(rule.rule_pattern),
       rulePattern: rule.rule_pattern,
       riskScore,
@@ -234,11 +240,13 @@ router.post('/verify-images', async (req, res) => {
       return res.status(500).json({ success: false, error: 'Failed to load rule' });
     }
     
-    const secretEmojis = secretImages.map(img => img.image_hash);
-    const { expected } = applyRule(rule.rule_pattern, secretEmojis);
+    const secretIconIds = secretImages.map(img => img.emoji_char);
+    const secretHashes = secretImages.map(img => img.image_hash);
+    const { expected } = applyRule(rule.rule_pattern, secretHashes);
     
-    const selectedHashes = selectedEmojis.map(emoji => 
-      crypto.createHash('sha256').update(emoji).digest('hex')
+    // Hash selected emoji IDs
+    const selectedHashes = selectedEmojis.map(iconId => 
+      crypto.createHash('sha256').update(iconId).digest('hex')
     );
     
     const behavioralAnalysis = analyzeClickPattern(clickTimings);
@@ -277,8 +285,7 @@ router.post('/verify-images', async (req, res) => {
       
       return res.json({ 
         success: true, 
-        nextStep: 'otp',
-        riskScore: { score: session.risk_score, level: 'low' }
+        message: 'Images verified successfully'
       });
     } else {
       const newFailedAttempts = user.failed_attempts + 1;
@@ -309,9 +316,7 @@ router.post('/verify-images', async (req, res) => {
       
       return res.status(400).json({ 
         success: false, 
-        error: 'Incorrect image selection',
-        attemptsRemaining: Math.max(0, 3 - newFailedAttempts),
-        isLocked
+        message: 'Incorrect image selection'
       });
     }
     
